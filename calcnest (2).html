@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CalcNest — Simple Calculators for Everyday Life</title>
+<meta name="description" content="CalcNest is a free collection of simple, fast calculators — basic math, BMI, tip, loan EMI, GST, compound interest, unit conversion, age, discount and more. No sign-up, no clutter.">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f7f6f3;
+    --card: #ffffff;
+    --ink: #2b2b28;
+    --muted: #6b6b64;
+    --accent: #3f7f6f;
+    --accent-soft: #e7f1ee;
+    --border: #e6e4de;
+    --radius: 12px;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  a { color: var(--accent); text-decoration: none; }
+
+  header.site {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .brand {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .brand .dot { color: var(--accent); }
+  nav.site-nav a {
+    margin-left: 16px;
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  nav.site-nav a:hover { color: var(--accent); }
+
+  .hero {
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 40px 20px 20px;
+  }
+  .hero h1 {
+    font-size: 28px;
+    margin-bottom: 8px;
+  }
+  .hero p {
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  .ad-slot {
+    max-width: 728px;
+    margin: 20px auto;
+    padding: 10px;
+    text-align: center;
+    font-size: 12px;
+    color: #b6b3aa;
+    border: 1px dashed #d8d5cc;
+    border-radius: 8px;
+    background: #fcfbf9;
+  }
+
+  main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 10px 20px 40px;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 760px) {
+    main { grid-template-columns: 1fr; }
+  }
+
+  .toc {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    height: fit-content;
+    position: sticky;
+    top: 16px;
+  }
+  .toc h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 10px; }
+  .toc a { display: block; padding: 6px 0; font-size: 14px; color: var(--ink); border-bottom: 1px solid var(--border); }
+  .toc a:last-child { border-bottom: none; }
+  .toc a:hover { color: var(--accent); }
+
+  .tool {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    margin-bottom: 22px;
+    scroll-margin-top: 16px;
+  }
+  .tool h2 {
+    font-size: 19px;
+    margin-bottom: 4px;
+  }
+  .tool .desc {
+    color: var(--muted);
+    font-size: 13.5px;
+    margin-bottom: 16px;
+  }
+
+  label {
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 10px;
+    margin-bottom: 4px;
+  }
+  input, select {
+    width: 100%;
+    padding: 10px;
+    font-size: 15px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fbfaf8;
+  }
+  input:focus, select:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+
+  .btn {
+    margin-top: 14px;
+    padding: 11px 18px;
+    font-size: 14.5px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+  }
+  .btn:hover { background: #356a5c; }
+
+  .result {
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: var(--accent-soft);
+    border-radius: 8px;
+    font-size: 14.5px;
+    font-weight: 600;
+    min-height: 20px;
+  }
+  .row2 { display: flex; gap: 10px; }
+  .row2 > div { flex: 1; }
+  .row3 { display: flex; gap: 10px; }
+  .row3 > div { flex: 1; }
+
+  /* Basic calculator keypad */
+  .display {
+    background: #222220;
+    color: #fff;
+    font-size: 30px;
+    text-align: right;
+    padding: 16px 14px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    word-wrap: break-word;
+    min-height: 56px;
+  }
+  .keys {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .key {
+    padding: 15px 0;
+    font-size: 17px;
+    border: none;
+    border-radius: 8px;
+    background: #f0efeb;
+    cursor: pointer;
+  }
+  .key:active { background: #e2e0d9; }
+  .key.op { background: var(--accent); color: #fff; }
+  .key.wide { grid-column: span 2; }
+  .key.equal { background: #c9873f; color: #fff; }
+
+  footer.site {
+    background: #2b2b28;
+    color: #cfcdc4;
+    padding: 30px 20px;
+    margin-top: 30px;
+  }
+  footer.site .foot-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  footer.site h4 { color: #fff; font-size: 14px; margin-bottom: 8px; }
+  footer.site a { color: #b8b6ad; font-size: 13px; display: block; margin-bottom: 6px; }
+  footer.site .col { min-width: 160px; }
+  footer.site .copyright {
+    text-align: center;
+    font-size: 12px;
+    color: #8a887f;
+    margin-top: 24px;
+  }
+
+  section.info {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px 30px;
+  }
+  section.info h2 { font-size: 20px; margin-bottom: 10px; }
+  section.info p { color: var(--muted); font-size: 14px; margin-bottom: 12px; max-width: 720px; }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="brand"><span>CalcNest</span><span class="dot">•</span></div>
+  <nav class="site-nav">
+    <a href="#basic">Calculators</a>
+    <a href="#about">About</a>
+    <a href="#privacy">Privacy</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <h1>Simple calculators, right when you need them</h1>
+  <p>No sign-up, no clutter — pick a calculator below and get your answer in seconds.</p>
+</div>
+
+<div class="ad-slot">Ad space (728×90) — paste your AdSense unit here</div>
+
+<main>
+  <aside class="toc">
+    <h3>Calculators</h3>
+    <a href="#basic">Basic</a>
+    <a href="#percent">Percent</a>
+    <a href="#discount">Discount</a>
+    <a href="#tip">Tip Splitter</a>
+    <a href="#bmi">BMI</a>
+    <a href="#age">Age</a>
+    <a href="#simple-interest">Simple Interest</a>
+    <a href="#compound-interest">Compound Interest</a>
+    <a href="#loan">Loan / EMI</a>
+    <a href="#gst">GST / Sales Tax</a>
+    <a href="#gpa">GPA</a>
+    <a href="#unit">Unit Converter</a>
+  </aside>
+
+  <div class="tools">
+
+    <!-- Basic -->
+    <div class="tool" id="basic">
+      <h2>Basic Calculator</h2>
+      <p class="desc">Everyday arithmetic — addition, subtraction, multiplication, division and percentages.</p>
+      <div class="display" id="basicDisplay">0</div>
+      <div class="keys">
+        <button class="key" onclick="clearBasic()">C</button>
+        <button class="key" onclick="backspace()">⌫</button>
+        <button class="key" onclick="appendOp('%')">%</button>
+        <button class="key op" onclick="appendOp('/')">÷</button>
+        <button class="key" onclick="appendNum('7')">7</button>
+        <button class="key" onclick="appendNum('8')">8</button>
+        <button class="key" onclick="appendNum('9')">9</button>
+        <button class="key op" onclick="appendOp('*')">×</button>
+        <button class="key" onclick="appendNum('4')">4</button>
+        <button class="key" onclick="appendNum('5')">5</button>
+        <button class="key" onclick="appendNum('6')">6</button>
+        <button class="key op" onclick="appendOp('-')">−</button>
+        <button class="key" onclick="appendNum('1')">1</button>
+        <button class="key" onclick="appendNum('2')">2</button>
+        <button class="key" onclick="appendNum('3')">3</button>
+        <button class="key op" onclick="appendOp('+')">+</button>
+        <button class="key wide" onclick="appendNum('0')">0</button>
+        <button class="key" onclick="appendNum('.')">.</button>
+        <button class="key equal" onclick="calcResult()">=</button>
+      </div>
+    </div>
+
+    <!-- Percent -->
+    <div class="tool" id="percent">
+      <h2>Percent Calculator</h2>
+      <p class="desc">Find what one number is as a percentage of another.</p>
+      <label>What is</label>
+      <div class="row3">
+        <div><input type="number" id="pctA" placeholder="20"></div>
+        <div style="flex:0 0 auto; display:flex; align-items:center; padding:0 6px; color:var(--muted); font-size:14px;">% of</div>
+        <div><input type="number" id="pctB" placeholder="150"></div>
+      </div>
+      <button class="btn" onclick="calcPercent()">Calculate</button>
+      <div class="result" id="pctResult"></div>
+    </div>
+
+    <!-- Discount -->
+    <div class="tool" id="discount">
+      <h2>Discount Calculator</h2>
+      <p class="desc">Work out the sale price and how much you're saving.</p>
+      <label>Original price</label>
+      <input type="number" id="discPrice" placeholder="100">
+      <label>Discount %</label>
+      <input type="number" id="discPct" placeholder="20">
+      <button class="btn" onclick="calcDiscount()">Calculate</button>
+      <div class="result" id="discResult"></div>
+    </div>
+
+    <!-- Tip -->
+    <div class="tool" id="tip">
+      <h2>Tip Splitter</h2>
+      <p class="desc">Calculate the tip and split the bill between everyone at the table.</p>
+      <label>Bill amount</label>
+      <input type="number" id="tipBill" placeholder="100">
+      <label>Tip %</label>
+      <input type="number" id="tipPct" placeholder="15">
+      <label>Split between (people)</label>
+      <input type="number" id="tipPeople" placeholder="1" value="1">
+      <button class="btn" onclick="calcTip()">Calculate</button>
+      <div class="result" id="tipResult"></div>
+    </div>
+
+    <!-- BMI -->
+    <div class="tool" id="bmi">
+      <h2>BMI Calculator</h2>
+      <p class="desc">Estimate your Body Mass Index from weight and height.</p>
+      <label>Weight (kg)</label>
+      <input type="number" id="bmiWeight" placeholder="70">
+      <label>Height (cm)</label>
+      <input type="number" id="bmiHeight" placeholder="175">
+      <button class="btn" onclick="calcBMI()">Calculate</button>
+      <div class="result" id="bmiResult"></div>
+    </div>
+
+    <!-- Age -->
+    <div class="tool" id="age">
+      <h2>Age Calculator</h2>
+      <p class="desc">Find your exact age in years, months and days from your date of birth.</p>
+      <label>Date of birth</label>
+      <input type="date" id="ageDob">
+      <button class="btn" onclick="calcAge()">Calculate</button>
+      <div class="result" id="ageResult"></div>
+    </div>
+
+    <!-- Simple Interest -->
+    <div class="tool" id="simple-interest">
+      <h2>Simple Interest Calculator</h2>
+      <p class="desc">Calculate interest earned or owed using the simple interest formula.</p>
+      <label>Principal amount</label>
+      <input type="number" id="siPrincipal" placeholder="10000">
+      <label>Annual interest rate (%)</label>
+      <input type="number" id="siRate" placeholder="8">
+      <label>Time (years)</label>
+      <input type="number" id="siTime" placeholder="3">
+      <button class="btn" onclick="calcSimpleInterest()">Calculate</button>
+      <div class="result" id="siResult"></div>
+    </div>
+
+    <!-- Compound Interest -->
+    <div class="tool" id="compound-interest">
+      <h2>Compound Interest Calculator</h2>
+      <p class="desc">See how your investment or loan grows when interest compounds over time.</p>
+      <label>Principal amount</label>
+      <input type="number" id="ciPrincipal" placeholder="10000">
+      <label>Annual interest rate (%)</label>
+      <input type="number" id="ciRate" placeholder="8">
+      <label>Time (years)</label>
+      <input type="number" id="ciTime" placeholder="5">
+      <label>Compounds per year</label>
+      <select id="ciFreq">
+        <option value="1">Annually</option>
+        <option value="2">Semi-annually</option>
+        <option value="4">Quarterly</option>
+        <option value="12" selected>Monthly</option>
+      </select>
+      <button class="btn" onclick="calcCompoundInterest()">Calculate</button>
+      <div class="result" id="ciResult"></div>
+    </div>
+
+    <!-- Loan / EMI -->
+    <div class="tool" id="loan">
+      <h2>Loan / EMI Calculator</h2>
+      <p class="desc">Estimate your monthly loan payment (EMI) for a home, car, or personal loan.</p>
+      <label>Loan amount</label>
+      <input type="number" id="loanAmt" placeholder="500000">
+      <label>Annual interest rate (%)</label>
+      <input type="number" id="loanRate" placeholder="9">
+      <label>Loan term (years)</label>
+      <input type="number" id="loanYears" placeholder="5">
+      <button class="btn" onclick="calcLoan()">Calculate</button>
+      <div class="result" id="loanResult"></div>
+    </div>
+
+    <!-- GST / Sales Tax -->
+    <div class="tool" id="gst">
+      <h2>GST / Sales Tax Calculator</h2>
+      <p class="desc">Add or remove tax from a price — useful for invoices and receipts.</p>
+      <label>Amount</label>
+      <input type="number" id="gstAmt" placeholder="1000">
+      <label>Tax rate (%)</label>
+      <input type="number" id="gstRate" placeholder="18">
+      <label>Amount type</label>
+      <select id="gstType">
+        <option value="exclusive">Amount is before tax (add tax)</option>
+        <option value="inclusive">Amount already includes tax (remove tax)</option>
+      </select>
+      <button class="btn" onclick="calcGST()">Calculate</button>
+      <div class="result" id="gstResult"></div>
+    </div>
+
+    <!-- GPA -->
+    <div class="tool" id="gpa">
+      <h2>GPA Calculator</h2>
+      <p class="desc">Work out your grade point average from up to 5 courses (4.0 scale).</p>
+      <div id="gpaRows">
+        <div class="row2">
+          <div><input type="number" step="0.1" min="0" max="4" placeholder="Grade (0–4)" class="gpaGrade"></div>
+          <div><input type="number" min="0" placeholder="Credits" class="gpaCredits"></div>
+        </div>
+      </div>
+      <button class="btn" style="background:#8a887f;" onclick="addGpaRow()">+ Add course</button>
+      <button class="btn" onclick="calcGPA()">Calculate</button>
+      <div class="result" id="gpaResult"></div>
+    </div>
+
+    <!-- Unit Converter -->
+    <div class="tool" id="unit">
+      <h2>Unit Converter</h2>
+      <p class="desc">Convert between common length and weight units.</p>
+      <label>Category</label>
+      <select id="unitCategory" onchange="updateUnitOptions()">
+        <option value="length">Length</option>
+        <option value="weight">Weight</option>
+      </select>
+      <div class="row2">
+        <div>
+          <label>From</label>
+          <select id="unitFrom"></select>
+        </div>
+        <div>
+          <label>To</label>
+          <select id="unitTo"></select>
+        </div>
+      </div>
+      <label>Value</label>
+      <input type="number" id="unitValue" placeholder="1">
+      <button class="btn" onclick="calcUnit()">Convert</button>
+      <div class="result" id="unitResult"></div>
+    </div>
+
+  </div>
+</main>
+
+<div class="ad-slot">Ad space (728×90) — paste your AdSense unit here</div>
+
+<section class="info" id="about">
+  <h2>About CalcNest</h2>
+  <p>CalcNest is a free, no-nonsense collection of everyday calculators. We built it because most calculator sites are cluttered with pop-ups and slow to load. Every tool here runs directly in your browser — nothing is uploaded, stored, or tracked beyond standard analytics.</p>
+  <p>Whether you're splitting a dinner bill, checking a loan payment, or working out your BMI, CalcNest aims to give you an answer in under ten seconds.</p>
+</section>
+
+<section class="info" id="privacy">
+  <h2>Privacy Policy</h2>
+  <p>CalcNest does not require an account and does not store the numbers you enter into any calculator — all calculations happen locally in your browser. This site may use cookies and third-party services (such as Google AdSense) to display ads and measure site performance. These services may collect information as described in their own privacy policies. Replace this section with your full privacy policy before publishing, including details on cookies, ad personalization, and data retention, as required by your local regulations (e.g. GDPR, CCPA).</p>
+</section>
+
+<section class="info" id="contact">
+  <h2>Contact</h2>
+  <p>Questions, feedback, or found a bug in a calculator? Reach out at <a href="mailto:hello@calcnest.example">hello@calcnest.example</a> — replace with your real contact address before publishing.</p>
+</section>
+
+<footer class="site">
+  <div class="foot-inner">
+    <div class="col">
+      <h4>CalcNest</h4>
+      <a href="#basic">Simple calculators for everyday life.</a>
+    </div>
+    <div class="col">
+      <h4>Site</h4>
+      <a href="#about">About</a>
+      <a href="#privacy">Privacy Policy</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <div class="col">
+      <h4>Calculators</h4>
+      <a href="#loan">Loan / EMI</a>
+      <a href="#compound-interest">Compound Interest</a>
+      <a href="#gst">GST / Sales Tax</a>
+    </div>
+  </div>
+  <div class="copyright">© 2026 CalcNest. All calculations are estimates — verify important figures independently.</div>
+</footer>
+
+<script>
+// ---- Basic calculator ----
+let expr = '';
+const basicDisplay = document.getElementById('basicDisplay');
+function updateDisplay() { basicDisplay.textContent = expr === '' ? '0' : expr; }
+function appendNum(n) { expr += n; updateDisplay(); }
+function appendOp(op) {
+  if (expr === '') return;
+  const last = expr[expr.length - 1];
+  if ('+-*/%'.includes(last)) expr = expr.slice(0, -1) + op;
+  else expr += op;
+  updateDisplay();
+}
+function clearBasic() { expr = ''; updateDisplay(); }
+function backspace() { expr = expr.slice(0, -1); updateDisplay(); }
+function calcResult() {
+  try {
+    let safe = expr.replace(/[^0-9+\-*/.%]/g, '');
+    let result = Function('"use strict"; return (' + safe + ')')();
+    expr = String(Math.round(result * 1e10) / 1e10);
+    updateDisplay();
+  } catch (e) { basicDisplay.textContent = 'Error'; expr = ''; }
+}
+
+// ---- Percent ----
+function calcPercent() {
+  const a = parseFloat(document.getElementById('pctA').value);
+  const b = parseFloat(document.getElementById('pctB').value);
+  const out = document.getElementById('pctResult');
+  if (isNaN(a) || isNaN(b)) { out.textContent = 'Enter both values'; return; }
+  out.textContent = `${a}% of ${b} = ${(a / 100 * b).toFixed(2)}`;
+}
+
+// ---- Discount ----
+function calcDiscount() {
+  const price = parseFloat(document.getElementById('discPrice').value);
+  const pct = parseFloat(document.getElementById('discPct').value);
+  const out = document.getElementById('discResult');
+  if (isNaN(price) || isNaN(pct)) { out.textContent = 'Enter price & discount %'; return; }
+  const saved = price * (pct / 100);
+  out.textContent = `You save ${saved.toFixed(2)} — Final price: ${(price - saved).toFixed(2)}`;
+}
+
+// ---- Tip ----
+function calcTip() {
+  const bill = parseFloat(document.getElementById('tipBill').value);
+  const pct = parseFloat(document.getElementById('tipPct').value);
+  const people = parseFloat(document.getElementById('tipPeople').value) || 1;
+  const out = document.getElementById('tipResult');
+  if (isNaN(bill) || isNaN(pct)) { out.textContent = 'Enter bill & tip %'; return; }
+  const tipAmt = bill * (pct / 100);
+  const total = bill + tipAmt;
+  out.textContent = `Tip: ${tipAmt.toFixed(2)} — Total: ${total.toFixed(2)} — Each: ${(total / people).toFixed(2)}`;
+}
+
+// ---- BMI ----
+function calcBMI() {
+  const w = parseFloat(document.getElementById('bmiWeight').value);
+  const h = parseFloat(document.getElementById('bmiHeight').value) / 100;
+  const out = document.getElementById('bmiResult');
+  if (isNaN(w) || isNaN(h) || h <= 0) { out.textContent = 'Enter weight & height'; return; }
+  const bmi = w / (h * h);
+  let category = 'Normal';
+  if (bmi < 18.5) category = 'Underweight';
+  else if (bmi >= 25 && bmi < 30) category = 'Overweight';
+  else if (bmi >= 30) category = 'Obese';
+  out.textContent = `BMI: ${bmi.toFixed(1)} (${category})`;
+}
+
+// ---- Age ----
+function calcAge() {
+  const dobVal = document.getElementById('ageDob').value;
+  const out = document.getElementById('ageResult');
+  if (!dobVal) { out.textContent = 'Pick a date'; return; }
+  const dob = new Date(dobVal);
+  const now = new Date();
+  let years = now.getFullYear() - dob.getFullYear();
+  let months = now.getMonth() - dob.getMonth();
+  let days = now.getDate() - dob.getDate();
+  if (days < 0) { months -= 1; days += new Date(now.getFullYear(), now.getMonth(), 0).getDate(); }
+  if (months < 0) { years -= 1; months += 12; }
+  out.textContent = `${years} years, ${months} months, ${days} days`;
+}
+
+// ---- Simple Interest ----
+function calcSimpleInterest() {
+  const p = parseFloat(document.getElementById('siPrincipal').value);
+  const r = parseFloat(document.getElementById('siRate').value);
+  const t = parseFloat(document.getElementById('siTime').value);
+  const out = document.getElementById('siResult');
+  if (isNaN(p) || isNaN(r) || isNaN(t)) { out.textContent = 'Enter all values'; return; }
+  const interest = (p * r * t) / 100;
+  out.textContent = `Interest: ${interest.toFixed(2)} — Total: ${(p + interest).toFixed(2)}`;
+}
+
+// ---- Compound Interest ----
+function calcCompoundInterest() {
+  const p = parseFloat(document.getElementById('ciPrincipal').value);
+  const r = parseFloat(document.getElementById('ciRate').value);
+  const t = parseFloat(document.getElementById('ciTime').value);
+  const n = parseFloat(document.getElementById('ciFreq').value);
+  const out = document.getElementById('ciResult');
+  if (isNaN(p) || isNaN(r) || isNaN(t)) { out.textContent = 'Enter all values'; return; }
+  const amount = p * Math.pow(1 + (r / 100) / n, n * t);
+  out.textContent = `Final amount: ${amount.toFixed(2)} — Interest earned: ${(amount - p).toFixed(2)}`;
+}
+
+// ---- Loan / EMI ----
+function calcLoan() {
+  const p = parseFloat(document.getElementById('loanAmt').value);
+  const annualRate = parseFloat(document.getElementById('loanRate').value);
+  const years = parseFloat(document.getElementById('loanYears').value);
+  const out = document.getElementById('loanResult');
+  if (isNaN(p) || isNaN(annualRate) || isNaN(years)) { out.textContent = 'Enter all values'; return; }
+  const r = annualRate / 12 / 100;
+  const n = years * 12;
+  let emi;
+  if (r === 0) emi = p / n;
+  else emi = (p * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+  const totalPay = emi * n;
+  out.textContent = `Monthly EMI: ${emi.toFixed(2)} — Total payment: ${totalPay.toFixed(2)} — Total interest: ${(totalPay - p).toFixed(2)}`;
+}
+
+// ---- GST / Sales Tax ----
+function calcGST() {
+  const amt = parseFloat(document.getElementById('gstAmt').value);
+  const rate = parseFloat(document.getElementById('gstRate').value);
+  const type = document.getElementById('gstType').value;
+  const out = document.getElementById('gstResult');
+  if (isNaN(amt) || isNaN(rate)) { out.textContent = 'Enter amount & rate'; return; }
+  if (type === 'exclusive') {
+    const tax = amt * (rate / 100);
+    out.textContent = `Tax: ${tax.toFixed(2)} — Total: ${(amt + tax).toFixed(2)}`;
+  } else {
+    const base = amt / (1 + rate / 100);
+    const tax = amt - base;
+    out.textContent = `Base price: ${base.toFixed(2)} — Tax: ${tax.toFixed(2)}`;
+  }
+}
+
+// ---- GPA ----
+function addGpaRow() {
+  const rows = document.getElementById('gpaRows');
+  const row = document.createElement('div');
+  row.className = 'row2';
+  row.style.marginTop = '8px';
+  row.innerHTML = `<div><input type="number" step="0.1" min="0" max="4" placeholder="Grade (0–4)" class="gpaGrade"></div>
+                    <div><input type="number" min="0" placeholder="Credits" class="gpaCredits"></div>`;
+  rows.appendChild(row);
+}
+function calcGPA() {
+  const grades = document.querySelectorAll('.gpaGrade');
+  const credits = document.querySelectorAll('.gpaCredits');
+  let totalPoints = 0, totalCredits = 0;
+  for (let i = 0; i < grades.length; i++) {
+    const g = parseFloat(grades[i].value);
+    const c = parseFloat(credits[i].value);
+    if (!isNaN(g) && !isNaN(c)) { totalPoints += g * c; totalCredits += c; }
+  }
+  const out = document.getElementById('gpaResult');
+  if (totalCredits === 0) { out.textContent = 'Enter at least one grade and credit value'; return; }
+  out.textContent = `GPA: ${(totalPoints / totalCredits).toFixed(2)}`;
+}
+
+// ---- Unit Converter ----
+const unitDefs = {
+  length: {
+    base: 'm',
+    units: { mm: 0.001, cm: 0.01, m: 1, km: 1000, in: 0.0254, ft: 0.3048, yd: 0.9144, mi: 1609.34 }
+  },
+  weight: {
+    base: 'kg',
+    units: { mg: 0.000001, g: 0.001, kg: 1, lb: 0.453592, oz: 0.0283495, ton: 1000 }
+  }
+};
+function updateUnitOptions() {
+  const cat = document.getElementById('unitCategory').value;
+  const from = document.getElementById('unitFrom');
+  const to = document.getElementById('unitTo');
+  from.innerHTML = '';
+  to.innerHTML = '';
+  Object.keys(unitDefs[cat].units).forEach(u => {
+    from.innerHTML += `<option value="${u}">${u}</option>`;
+    to.innerHTML += `<option value="${u}">${u}</option>`;
+  });
+  to.selectedIndex = 1;
+}
+function calcUnit() {
+  const cat = document.getElementById('unitCategory').value;
+  const from = document.getElementById('unitFrom').value;
+  const to = document.getElementById('unitTo').value;
+  const val = parseFloat(document.getElementById('unitValue').value);
+  const out = document.getElementById('unitResult');
+  if (isNaN(val)) { out.textContent = 'Enter a value'; return; }
+  const defs = unitDefs[cat].units;
+  const inBase = val * defs[from];
+  const converted = inBase / defs[to];
+  out.textContent = `${val} ${from} = ${converted.toFixed(6).replace(/\.?0+$/, '')} ${to}`;
+}
+updateUnitOptions();
+</script>
+
+</body>
+</html>
